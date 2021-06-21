@@ -4,10 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import okhttp3.*;
 import org.springframework.stereotype.Component;
-import sysu.lulp.community.dto.AccessTokenDTO;
 import sysu.lulp.community.dto.GiteeAccessTokenDTO;
 import sysu.lulp.community.dto.GiteeUser;
-import sysu.lulp.community.dto.GithubUser;
 
 import java.io.IOException;
 
@@ -20,7 +18,7 @@ public class GiteeProvider {
         OkHttpClient client = new OkHttpClient();
 
         RequestBody body = RequestBody.create(mediaType, JSON.toJSONString(giteeAccessTokenDTO));
-        System.out.println(JSON.toJSONString(giteeAccessTokenDTO));
+//        System.out.println(JSON.toJSONString(giteeAccessTokenDTO));
         Request request = new Request.Builder()
                 .url("https://gitee.com/oauth/token")
                 .post(body)
@@ -28,8 +26,8 @@ public class GiteeProvider {
         try (Response response = client.newCall(request).execute()) {
             String string = response.body().string();
             JSONObject jsonObject = JSON.parseObject(string);
-            System.out.println(jsonObject.get("access_token"));
-            System.out.println(string);
+//            System.out.println(jsonObject.get("access_token"));
+//            System.out.println(string);
             return (String)jsonObject.get("access_token");
         } catch (IOException e) {
             e.printStackTrace();
@@ -44,7 +42,7 @@ public class GiteeProvider {
                 .build();
         try (Response response = client.newCall(request).execute()) {
             String string = response.body().string();
-            System.out.println(string);
+//            System.out.println(string);
             GiteeUser giteeUser = JSON.parseObject(string, GiteeUser.class);
             return giteeUser;
         } catch (IOException e) {

@@ -1,14 +1,20 @@
 package sysu.lulp.community.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import sysu.lulp.community.dto.AccessTokenDTO;
 import sysu.lulp.community.dto.GiteeAccessTokenDTO;
 import sysu.lulp.community.dto.GiteeUser;
+import sysu.lulp.community.mapper.UserMapper;
+import sysu.lulp.community.model.User;
 import sysu.lulp.community.provider.GiteeProvider;
 import sysu.lulp.community.provider.GithubProvider;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.UUID;
 
 @Controller
 public class AuthorizeController {
@@ -18,6 +24,49 @@ public class AuthorizeController {
 
     @Autowired
     private GiteeProvider giteeProvider;
+
+    @Value("${gitee.client.id}")
+    private String clientId;
+
+    @Value("${gitee.client.secret}")
+    private String clientSecret;
+
+    @Value("${gitee.rediret.uri}")
+    private String redirectUri;
+
+    @Value("${gitee.grant.type}")
+    private String grantType;
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @GetMapping("/GiteeCallback")
+    public String giteeCallback(@RequestParam(name="code") String code,
+                                HttpServletRequest request){
+//        System.out.println(code);
+        GiteeAccessTokenDTO giteeAccessTokenDTO = new GiteeAccessTokenDTO();
+        giteeAccessTokenDTO.setClient_id(clientId);
+        giteeAccessTokenDTO.setClient_secret(clientSecret);
+        giteeAccessTokenDTO.setCode(code);
+        giteeAccessTokenDTO.setRedirect_uri(redirectUri);
+        giteeAccessTokenDTO.setGrant_type(grantType);
+        String accessToken = giteeProvider.getAccessToken(giteeAccessTokenDTO);
+        GiteeUser giteeUser = giteeProvider.getUser(accessToken);
+        if(giteeUser != null){
+            User user = new User();
+            user.setToken(UUID.randomUUID().toString());
+            user.setName(giteeUser.getName());
+            user.setAccountId(String.valueOf(giteeUser.getId()));
+            user.setGmtCreate(System.currentTimeMillis());
+            user.setGmtModified(user.getGmtCreate());
+            userMapper.insert(user);
+            request.getSession().setAttribute("user", giteeUser);
+            return "redirect:/";
+        }else{
+            return "redirect:/";
+        }
+
+    }
 
     @GetMapping("/callback")
     public String callback(@RequestParam(name = "code") String code,
@@ -30,21 +79,6 @@ public class AuthorizeController {
         accessTokenDTO.setState(state);
         accessTokenDTO.setRedirect_uri("http://localhost:8887/callback");
         githubProvider.getAccessToken(accessTokenDTO);
-        return "index";
-    }
-
-    @GetMapping("/GiteeCallback")
-    public String giteeCallback(@RequestParam(name="code") String code){
-        System.out.println(code);
-        GiteeAccessTokenDTO giteeAccessTokenDTO = new GiteeAccessTokenDTO();
-        giteeAccessTokenDTO.setClient_id("736e705e861edfb8fde9f984c997984b18d03a03758acf32783329b8398893be");
-        giteeAccessTokenDTO.setClient_secret("403dca249ae9e989da55037a56449e6f889cb2278ac3d798f87149eeaf309a32");
-        giteeAccessTokenDTO.setCode(code);
-        giteeAccessTokenDTO.setRedirect_uri("http://localhost:8887/GiteeCallback");
-        giteeAccessTokenDTO.setGrant_type("authorization_code");
-        String accessToken = giteeProvider.getAccessToken(giteeAccessTokenDTO);
-        GiteeUser giteeUser = giteeProvider.getUser(accessToken);
-        System.out.println(giteeUser.toString());
         return "index";
     }
 }
