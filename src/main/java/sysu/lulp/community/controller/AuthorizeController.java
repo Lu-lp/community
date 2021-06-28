@@ -13,7 +13,9 @@ import sysu.lulp.community.model.User;
 import sysu.lulp.community.provider.GiteeProvider;
 import sysu.lulp.community.provider.GithubProvider;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 
 @Controller
@@ -42,7 +44,8 @@ public class AuthorizeController {
 
     @GetMapping("/GiteeCallback")
     public String giteeCallback(@RequestParam(name="code") String code,
-                                HttpServletRequest request){
+                                HttpServletRequest request,
+                                HttpServletResponse response){
 //        System.out.println(code);
         GiteeAccessTokenDTO giteeAccessTokenDTO = new GiteeAccessTokenDTO();
         giteeAccessTokenDTO.setClient_id(clientId);
@@ -57,10 +60,12 @@ public class AuthorizeController {
             user.setToken(UUID.randomUUID().toString());
             user.setName(giteeUser.getName());
             user.setAccountId(String.valueOf(giteeUser.getId()));
+            user.setAvatarUrl(giteeUser.getAvatarUrl());
             user.setGmtCreate(System.currentTimeMillis());
             user.setGmtModified(user.getGmtCreate());
             userMapper.insert(user);
-            request.getSession().setAttribute("user", giteeUser);
+            response.addCookie(new Cookie("token", user.getToken()));
+//            request.getSession().setAttribute("user", giteeUser);
             return "redirect:/";
         }else{
             return "redirect:/";
