@@ -12,6 +12,7 @@ import sysu.lulp.community.mapper.UserMapper;
 import sysu.lulp.community.model.User;
 import sysu.lulp.community.provider.GiteeProvider;
 import sysu.lulp.community.provider.GithubProvider;
+import sysu.lulp.community.service.UserService;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +43,9 @@ public class AuthorizeController {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private UserService userService;
+
     @GetMapping("/GiteeCallback")
     public String giteeCallback(@RequestParam(name="code") String code,
                                 HttpServletRequest request,
@@ -61,9 +65,8 @@ public class AuthorizeController {
             user.setName(giteeUser.getName());
             user.setAccountId(String.valueOf(giteeUser.getId()));
             user.setAvatarUrl(giteeUser.getAvatarUrl());
-            user.setGmtCreate(System.currentTimeMillis());
-            user.setGmtModified(user.getGmtCreate());
-            userMapper.insert(user);
+//            userMapper.insert(user);
+            userService.createOrUpdate(user);
             response.addCookie(new Cookie("token", user.getToken()));
 //            request.getSession().setAttribute("user", giteeUser);
             return "redirect:/";
@@ -85,5 +88,15 @@ public class AuthorizeController {
         accessTokenDTO.setRedirect_uri("http://localhost:8887/callback");
         githubProvider.getAccessToken(accessTokenDTO);
         return "index";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request,
+                         HttpServletResponse response){
+        request.getSession().removeAttribute("user");
+        Cookie cookie = new Cookie("token", null);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        return "redirect:/";
     }
 }
