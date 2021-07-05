@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sysu.lulp.community.dto.PaginationDTO;
 import sysu.lulp.community.dto.QuestionDTO;
+import sysu.lulp.community.exception.CustomizeErrorCode;
+import sysu.lulp.community.exception.CustomizeException;
 import sysu.lulp.community.mapper.QuestionMapper;
 import sysu.lulp.community.mapper.UserMapper;
 import sysu.lulp.community.model.Question;
@@ -96,6 +98,9 @@ public class QuestionService {
 
     public QuestionDTO getById(Integer id) {
         Question question = questionMapper.selectByPrimaryKey(id);
+        if(question == null){
+            throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+        }
         QuestionDTO questionDTO = new QuestionDTO();
         BeanUtils.copyProperties(question, questionDTO);
         User user = userMapper.selectByPrimaryKey(question.getCreator());
@@ -107,13 +112,19 @@ public class QuestionService {
         if(question.getId() == null){
             question.setGmtCreate(System.currentTimeMillis());
             question.setGmtModified(question.getGmtCreate());
+            question.setViewCount(0);
+            question.setLikeCount(0);
+            question.setCommentCount(0);
             questionMapper.insert(question);
         }else{
             question.setGmtModified(System.currentTimeMillis());
 //            QuestionExample questionExample = new QuestionExample();
 //            questionExample.createCriteria().andIdEqualTo(question.getId());
 //            questionMapper.updateByExample(question, questionExample);
-            questionMapper.updateByPrimaryKey(question);
+            int i = questionMapper.updateByPrimaryKeySelective(question);
+            if(i != 1){
+                throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+            }
         }
     }
 }
