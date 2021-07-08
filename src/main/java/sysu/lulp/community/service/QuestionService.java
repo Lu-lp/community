@@ -8,6 +8,7 @@ import sysu.lulp.community.dto.PaginationDTO;
 import sysu.lulp.community.dto.QuestionDTO;
 import sysu.lulp.community.exception.CustomizeErrorCode;
 import sysu.lulp.community.exception.CustomizeException;
+import sysu.lulp.community.mapper.QuestionExtMapper;
 import sysu.lulp.community.mapper.QuestionMapper;
 import sysu.lulp.community.mapper.UserMapper;
 import sysu.lulp.community.model.Question;
@@ -25,6 +26,9 @@ public class QuestionService {
 
     @Autowired
     private QuestionMapper questionMapper;
+
+    @Autowired
+    private QuestionExtMapper questionExtMapper;
 
     public PaginationDTO list(Integer page, Integer size) {
         Integer totalCount = (int) questionMapper.countByExample(new QuestionExample());
@@ -126,5 +130,13 @@ public class QuestionService {
                 throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
             }
         }
+    }
+
+    public void incView(Integer id) {
+        Question updateQuestion = new Question();
+        updateQuestion.setId(id);
+        updateQuestion.setViewCount(1);
+        questionExtMapper.incView(updateQuestion);
+//        questionMapper.updateByExampleSelective(updateQuestion, questionExample);
     }
 }
