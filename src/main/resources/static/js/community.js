@@ -1,8 +1,13 @@
+/**
+ * Created by codedrinker on 2019/6/1.
+ */
 
-
+/**
+ * 提交回复
+ */
 function post() {
-    const questionId = $("#question_id").val();
-    const content = $("#comment_content").val();
+    var questionId = $("#question_id").val();
+    var content = $("#comment_content").val();
     comment2target(questionId, 1, content);
 }
 

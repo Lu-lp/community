@@ -6,12 +6,17 @@
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/bootstrap-theme.min.css" rel="stylesheet">
     <link href="/css/community.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="/css/editormd.min.css">
+    <link rel="stylesheet" href="/css/editormd.preview.min.css">
     <!--    <script src="js/jquery.min.js" type="application/javascript"></script>-->
     <script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js" type="application/javascript"></script>
     <script src="/js/moment.js"></script>
     <script src="/js/community.js"></script>
+    <script src="/js/editormd.min.js"></script>
+    <script src="/js/lib/marked.min.js"></script>
+    <script src="/js/lib/prettify.min.js"></script>
+
 
 </head>
 <body>
@@ -28,9 +33,28 @@
             </span>
 
                 <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" th:text="${question.description}">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="question-view">
+                    <label>
+                        <textarea style="display:none;" th:text="${question.description}"></textarea>
+                    </label>
                 </div>
+                <script type="text/javascript">
+                    $(function () {
+                        editormd.markdownToHTML("question-view", {});
+                    });
+                </script>
+<!--                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" th:text="${question.description}">-->
+<!--                </div>-->
 
+                <!--标签-->
+                <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <span class="question-tag" th:each="tag : ${question.tag.split('，')}">
+<!--                        <a th:href="@{/(page=1,tag=${tag})}"-->
+<!--                           th:text="${tag}" class="community-tag"></a>-->
+                        <span th:text="${tag}" class="community-tag"></span>
+                    </span>
+                </div>
                 <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <a class="community-menu" th:href="@{'/publish/'+${question.id}}"
@@ -75,10 +99,10 @@
                             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 collapse sub-comments"
                                  th:id="${'comment-'+comment.id}">
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                    <input type="text" class="form-control" placeholder="评论一下……"
-                                           th:id="${'input-'+comment.id}">
-                                    <button type="button" class="btn btn-success pull-right" onclick="comment(this)"
-                                            th:data-id="${comment.id}">评论
+                                    <input class="form-control" placeholder="评论一下……" th:id="${'input-'+comment.id}"
+                                           type="text">
+                                    <button class="btn btn-success pull-right" onclick="comment(this)" th:data-id="${comment.id}"
+                                            type="button">评论
                                     </button>
                                 </div>
                             </div>
@@ -133,8 +157,15 @@
                     </div>
                 </div>
             </div>
+            <!--            相关问题-->
+            <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <h3>相关问题</h3>
+                <h4>相关问题</h4>
+                <ul class="question-related">
+                    <li th:each="related : ${relatedQuestions}">
+                        <a th:href="@{'/question/'+ ${related.id}}" th:text="${related.title}"></a>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>

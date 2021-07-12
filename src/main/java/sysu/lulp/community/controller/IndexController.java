@@ -26,9 +26,11 @@ public class IndexController {
     public String hello(HttpServletRequest request,
                         @RequestParam(name = "page", defaultValue = "1") Integer page,
                         @RequestParam(name = "size", defaultValue = "2") Integer size,
+                        @RequestParam(name = "search", required = false) String search,
                         Model model) {
-        PaginationDTO paginationDTO = questionService.list(page, size);
+        PaginationDTO paginationDTO = questionService.list(search, page, size);
         model.addAttribute("pagination", paginationDTO);
+        model.addAttribute("search", search);
 //        System.out.println("asdddddddd");
         return "index";
     }

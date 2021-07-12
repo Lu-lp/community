@@ -18,9 +18,9 @@
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <form class="navbar-form navbar-left">
+                <form class="navbar-form navbar-left" action="/" method="get">
                     <div class="form-group">
-                        <input class="form-control" placeholder="搜索问题" type="text">
+                        <input class="form-control" placeholder="搜索问题" name="search"type="text">
                     </div>
                     <button class="btn btn-default" type="submit">Submit</button>
                 </form>
@@ -29,8 +29,17 @@
                     <li th:if="${session.user != null}">
                         <a href="/publish">发布</a>
                     </li>
+<!--                    th:text="${session.unreadCount}"-->
+                    <li>
+                        <a href="/profile/replies">
+                            通知
+                            <span class="badge" th:text="${session.unreadCount}">
+                            </span>
+                        </a>
+                    </li>
                     <li th:if="${session.user == null}">
-                        <a href="https://gitee.com/oauth/authorize?client_id=736e705e861edfb8fde9f984c997984b18d03a03758acf32783329b8398893be&redirect_uri=http://localhost:8888/GiteeCallback&response_type=code">登录</a>
+                        <a href="https://gitee.com/oauth/authorize?client_id=736e705e861edfb8fde9f984c997984b18d03a03758acf32783329b8398893be&redirect_uri=http://localhost:8888/GiteeCallback&response_type=code">登录
+                        </a>
                     </li>
                     <li class="dropdown" th:if="${session.user != null}">
                         <a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle" data-toggle="dropdown" href="#"
